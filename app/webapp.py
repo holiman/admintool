@@ -77,11 +77,11 @@ SCOPES = [
 app = flask.Flask(__name__)
 app.secret_key = open("/dev/urandom","rb").read(32) 
 
-@app.route("/")
+@app.route("/admin/")
 def index():
     return render_template("report.html",errors="Not logged in")
 
-@app.route('/iplist')
+@app.route('/admin/iplist')
 def iplist():
   if 'credentials' not in flask.session:
     return flask.redirect('authorize')
@@ -110,7 +110,7 @@ def iplist():
           return render_template("report.html", errors= traceback.format_exc())
 
 
-@app.route('/authorize')
+@app.route('/admin/authorize')
 def authorize():
   # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
   flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
@@ -130,7 +130,7 @@ def authorize():
   return flask.redirect(authorization_url)
 
 
-@app.route('/oauth2callback')
+@app.route('/admin/oauth2callback')
 def oauth2callback():
   # Specify the state when creating the flow in the callback so that it can
   # verified in the authorization server response.
@@ -151,7 +151,7 @@ def oauth2callback():
   return flask.redirect(flask.url_for('iplist'))
 
 
-@app.route('/logout')
+@app.route('/admin/logout')
 def revoke():
   if 'credentials' not in flask.session:
     return ('You need to <a href="/authorize">authorize</a> before ' +
