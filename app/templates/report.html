@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+	<div class="container-fluid">
+
+	{% if errors %}
+
+	<pre>{{errors}}</pre>
+
+	{% endif %}
+
+	{% if warnings %}
+	<h2>Warnings</h2>
+
+	<table class="table table-striped">
+	 	{% for items in warnings %}
+	 	<tr>
+	 		{% for item in items %}
+				<td>{{item}}</td>
+			{% endfor %}
+	 	</tr>
+		{% endfor %}
+	</table>
+	{% endif %}
+
+	{% if ips %}
+
+	<h2>Blacklisted ip addresses </h2>
+
+	<table class="table table-striped">
+		{% for ip in ips %}
+		<tr><td><a href="https://ipalyzer.com/{{ip}}">{{ips[ip]}}</a></td></tr>
+		{% endfor %}
+	</table>
+	{% endif %}
+
+	{% if events %}
+
+	<h2>Events</h2>
+
+	<table class="table table-striped">
+		<tr>
+			<th>Email</th>
+			<th>Ip</th>
+			<th>Hostname</th>
+			<th>Country</th>
+			<th>City</th>
+			<th>Event</th>
+			<th>Time</th>
+			<th>Note</th>
+		</th>
+	 	{% for event in events %}
+	 	
+	 	<tr class="{{event['class']}}">
+	 		{% for info in event['data'] %}
+				<td>{{info}}</td>
+			{% endfor %}
+	 	</tr>
+		{% endfor %}
+	</table>
+	{% endif %}
+
+
+	<a href="/iplist" class="btn btn-primary btn-lg active" role="button">Run again</a>
+	<br/>
+	<a href="/logout" class="btn btn-primary btn-lg active" role="button">Log out</a>
+
+	This product includes GeoLite2 data created by MaxMind, available from
+	<a href="http://www.maxmind.com">http://www.maxmind.com</a>.
+
+</div>
+
+</body>
