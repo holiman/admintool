@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
+import os,sys
 import flask
 import requests
 import httplib2,json
@@ -62,7 +62,7 @@ geo_city_reader = geoip2.database.Reader('/GeoLite2-City.mmdb')
 
 # This variable specifies the name of a file that contains the OAuth 2.0
 # information for this application, including its client_id and client_secret.
-CLIENT_SECRETS_FILE = "/creds/client_secret.json"
+CLIENT_SECRETS_FILE = "/creds/client_secrets.json"
 
 # This OAuth 2.0 access scope allows for full read/write access to the
 # authenticated user's account and requires requests to use an SSL connection.
@@ -73,6 +73,8 @@ SCOPES = [
   "https://www.googleapis.com/auth/admin.reports.usage.readonly",
 ]
 
+def url_for(endpoint):
+  return "%s/%s" % (external_webroot, endpoint)
 
 app = flask.Flask(__name__)
 app.secret_key = open("/dev/urandom","rb").read(32) 
@@ -84,7 +86,7 @@ def index():
 @app.route('/admin/iplist')
 def iplist():
   if 'credentials' not in flask.session:
-    return flask.redirect('authorize')
+    return flask.redirect(url_for('admin/authorize'))
 
   # Load credentials from the session.
   credentials = google.oauth2.credentials.Credentials(
@@ -116,7 +118,7 @@ def authorize():
   flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
       CLIENT_SECRETS_FILE, scopes=SCOPES)
 
-  flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+  flow.redirect_uri = url_for('admin/oauth2callback')
 
   authorization_url, state = flow.authorization_url(
       # Enable offline access so that you can refresh an access token without
@@ -138,8 +140,8 @@ def oauth2callback():
 
   flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
       CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
-  flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
-
+  #flow.redirect_uri = flask.url_for('oauth2callback', _external=True)
+  flow.redirect_uri = url_for('admin/oauth2callback')
   # Use the authorization server's response to fetch the OAuth 2.0 tokens.
   authorization_response = flask.request.url
   flow.fetch_token(authorization_response=authorization_response)
@@ -148,7 +150,7 @@ def oauth2callback():
   credentials = flow.credentials
   flask.session['credentials'] = credentials_to_dict(credentials)
 
-  return flask.redirect(flask.url_for('iplist'))
+  return flask.redirect(url_for('admin/iplist'))
 
 
 @app.route('/admin/logout')
@@ -246,12 +248,13 @@ def report_events(content_json):
   return render_template("report.html", ips = ips, events=events, errors=errors)
 
 
+external_webroot = "http://localhost:5000/"
 
 if __name__ == '__main__':
   # When running locally, disable OAuthlib's HTTPs verification.
   # ACTION ITEM for developers:
   #     When running in production *do not* leave this option enabled.
   os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-
-  app.run('0.0.0.0', 5000, debug=False)# -*- coding: utf-8 -*-
+  external_webroot = sys.argv[1]
+  app.run('0.0.0.0', 5000, debug=False)
 
